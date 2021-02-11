@@ -35,7 +35,7 @@ local function serialize(data)
 	end
 	return table.concat(tbl, ";")
 end
-	
+
 -- to convert the data base from v2 to v3
 local function extract_data(data)
 	local tbl = {}
@@ -151,9 +151,17 @@ end
 
 local function generate_Key2Number()
 	local key
+	local to_remove = {}
 	for num,item in pairs(Number2Pos) do
-		key = get_key_str(item.pos)
-		Key2Number[key] = num
+		if item.pos then
+			key = get_key_str(item.pos)
+			Key2Number[key] = num
+		else
+			table.insert(to_remove, num)
+		end
+	end
+	for _, num in ipairs(to_remove) do
+		Number2Pos[num] = nil
 	end
 end
 
@@ -623,8 +631,8 @@ end
 local function parse_number(s)
 	for _,word in ipairs(s:split(" ")) do
 		local n = tonumber(word)
-		if n and n > 0 then 
-			return word 
+		if n and n > 0 then
+			return word
 		end
 	end
 end
@@ -633,7 +641,7 @@ local function get_node_number(pos)
 	local meta = M(pos)
 	local num = meta:get_string("tubelib_number")
 	if num and num ~= "" then return num end
-	
+
 	num = meta:get_string("number")
 	if num and num ~= "" then return num end
 
@@ -648,7 +656,7 @@ end
 
 local function data_maintenance()
 	minetest.log("info", "[Tubelib] Data maintenance started")
-	
+
 	-- Remove unused positions
 	local tbl = table.copy(Number2Pos)
 	Number2Pos = {}
