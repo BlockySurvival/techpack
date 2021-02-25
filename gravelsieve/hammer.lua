@@ -1,18 +1,6 @@
---[[
-
-	Gravel Sieve Mod
-	================
-
-]]--
-
--- Load support for I18n
 local S = gravelsieve.S
 
-gravelsieve.disallow = function(pos, node, user, mode, new_param2)
-	return false
-end
-
-gravelsieve.handler = function(itemstack, user, pointed_thing)
+local function handler(itemstack, user, pointed_thing)
 	if pointed_thing.type ~= "node" then
 		return
 	end
@@ -25,7 +13,7 @@ gravelsieve.handler = function(itemstack, user, pointed_thing)
 	end
 
 	local node = minetest.get_node(pos)
-	if node.name == "default:cobble" or node.name == "default:mossycobble" 
+	if node.name == "default:cobble" or node.name == "default:mossycobble"
 			or node.name == "default:desert_cobble" then
 		node.name = "default:gravel"
 		minetest.swap_node(pos, node)
@@ -45,16 +33,7 @@ minetest.register_tool("gravelsieve:hammer", {
 	description = S("Hammer converts Cobblestone into Gravel"),
 	inventory_image = "gravelsieve_hammer.png",
 	on_use = function(itemstack, user, pointed_thing)
-		return gravelsieve.handler(itemstack, user, pointed_thing)
+		return handler(itemstack, user, pointed_thing)
 	end,
-})
-
-minetest.register_craft({
-	output = "gravelsieve:hammer",
-	recipe = {
-		{"", "default:steel_ingot", ""},
-		{"", "group:stick", "default:steel_ingot"},
-		{"group:stick", "", ""},
-	}
 })
 
