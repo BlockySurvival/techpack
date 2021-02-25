@@ -138,11 +138,12 @@ function gravelsieve.api.can_process(input_name)
 end
 
 local function get_random_default(input_name)
-    local rv = math.random() * default_totals[input_name]
-    local t = 0
+    local random_value = math.random() * default_totals[input_name]
+    local running_total = 0
     local last_name = ""
     for default_name, value in pairs(defaults[input_name]) do
-        if t + value >= rv then
+        running_total = running_total + value
+        if running_total >= random_value then
             return default_name
         end
         last_name = default_name
@@ -151,11 +152,12 @@ local function get_random_default(input_name)
 end
 
 local function get_random_output(input_name)
-    local rv = math.random() * output_totals[input_name]
-    local t = 0
+    local random_value = math.random() * output_totals[input_name]
+    local running_total = 0
     local last_name = ""
     for output_name, value in pairs(outputs[input_name]) do
-        if t + value >= rv then
+        running_total = running_total + value
+        if running_total >= random_value then
             return output_name
         end
         last_name = output_name
