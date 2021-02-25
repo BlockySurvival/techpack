@@ -13,7 +13,6 @@ local default_totals = {}
 local outputs = {}
 local output_totals = {}
 
-
 minetest.register_on_mods_loaded(function()
     for input_name, _ in pairs(inputs) do
         local default_total = 0.0
@@ -31,6 +30,33 @@ minetest.register_on_mods_loaded(function()
     mods_loaded = true
 end)
 
+local function get_random_default(input_name)
+    local random_value = math.random() * default_totals[input_name]
+    local running_total = 0
+    local last_name = ""
+    for default_name, value in pairs(defaults[input_name]) do
+        running_total = running_total + value
+        if running_total >= random_value then
+            return default_name
+        end
+        last_name = default_name
+    end
+    return last_name
+end
+
+local function get_random_output(input_name)
+    local random_value = math.random() * output_totals[input_name]
+    local running_total = 0
+    local last_name = ""
+    for output_name, value in pairs(outputs[input_name]) do
+        running_total = running_total + value
+        if running_total >= random_value then
+            return output_name
+        end
+        last_name = output_name
+    end
+    return last_name
+end
 
 --[[
 e.g.
@@ -139,38 +165,8 @@ function gravelsieve.api.remove_output(input_name, output_name)
     return relative_probability
 end
 
----------------------------
-
 function gravelsieve.api.can_process(input_name)
     return inputs[input_name]
-end
-
-local function get_random_default(input_name)
-    local rv = math.random() * default_totals[input_name]
-    local t = 0
-    local last_name = ""
-    for default_name, value in pairs(defaults[input_name]) do
-        if t + value >= rv then
-            return default_name
-        end
-        t = t + value
-        last_name = default_name
-    end
-    return last_name
-end
-
-local function get_random_output(input_name)
-    local rv = math.random() * output_totals[input_name]
-    local t = 0
-    local last_name = ""
-    for output_name, value in pairs(outputs[input_name]) do
-        if t + value >= rv then
-            return output_name
-        end
-        t = t + value
-        last_name = output_name
-    end
-    return last_name
 end
 
 function gravelsieve.api.get_random_output(input_name)
