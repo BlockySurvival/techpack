@@ -44,7 +44,16 @@ function gravelsieve.api.register_input(input_name, default_chance, default_outp
         error("cannot update gravelsieve outputs after mods are loaded")
 
     elseif inputs[input_name] or defaults[input_name] or outputs[input_name] then
-        error("re-registering input \"%s\"", input_name)
+        error(("re-registering input \"%s\""):format(input_name))
+
+    elseif not minetest.registered_nodes[input_name] then
+        error(("attempt to register unknown node \"%s\""):format(input_name))
+    end
+
+    for default_name, _ in pairs(default_outputs) do
+        if not minetest.registered_nodes[default_name] then
+            error(("attempt to register unknown node \"%s\""):format(default_name))
+        end
     end
 
     inputs[input_name] = default_chance
@@ -55,6 +64,15 @@ end
 function gravelsieve.api.override_input(input_name, default_chance, default_outputs)
     if mods_loaded then
         error("cannot update gravelsieve outputs after mods are loaded")
+
+    elseif not minetest.registered_nodes[input_name] then
+        error(("attempt to register unknown node \"%s\""):format(input_name))
+    end
+
+    for default_name, _ in pairs(default_outputs) do
+        if not minetest.registered_nodes[default_name] then
+            error(("attempt to register unknown node \"%s\""):format(default_name))
+        end
     end
 
     inputs[input_name] = default_chance
@@ -82,8 +100,12 @@ gravelsieve.api.register_output("default:gravel", "default:iron_lump", 0.01)
 function gravelsieve.api.register_output(input_name, output_name, relative_probability)
     if mods_loaded then
         error("cannot update gravelsieve outputs after mods are loaded")
+
+    elseif not minetest.registered_nodes[output_name] then
+        error(("attempt to register unknown node \"%s\""):format(output_name))
+
     elseif outputs[input_name][output_name] then
-        error("re-registering output \"%s\" for \"%s\"", input_name, output_name)
+        error(("re-registering output \"%s\" for \"%s\""):format(input_name, output_name))
     end
     outputs[input_name][output_name] = relative_probability
 end
@@ -91,6 +113,9 @@ end
 function gravelsieve.api.override_output(input_name, output_name, relative_probability)
     if mods_loaded then
         error("cannot update gravelsieve outputs after mods are loaded")
+
+    elseif not minetest.registered_nodes[output_name] then
+        error(("attempt to register unknown node \"%s\""):format(output_name))
     end
 
     outputs[input_name][output_name] = relative_probability
