@@ -46,13 +46,14 @@ function gravelsieve.api.register_input(input_name, default_chance, default_outp
     elseif inputs[input_name] or defaults[input_name] or outputs[input_name] then
         error(("re-registering input \"%s\""):format(input_name))
 
-    elseif not minetest.registered_nodes[input_name] then
+    elseif not minetest.registered_items[input_name] then
         error(("attempt to register unknown node \"%s\""):format(input_name))
     end
 
     for default_name, _ in pairs(default_outputs) do
-        if not minetest.registered_nodes[default_name] then
-            error(("attempt to register unknown node \"%s\""):format(default_name))
+        local stack = ItemStack(default_name)
+        if not minetest.registered_items[stack:get_name()] then
+            error(("attempt to register unknown node \"%s\""):format(stack:get_name()))
         end
     end
 
@@ -65,13 +66,14 @@ function gravelsieve.api.override_input(input_name, default_chance, default_outp
     if mods_loaded then
         error("cannot update gravelsieve outputs after mods are loaded")
 
-    elseif not minetest.registered_nodes[input_name] then
+    elseif not minetest.registered_items[input_name] then
         error(("attempt to register unknown node \"%s\""):format(input_name))
     end
 
     for default_name, _ in pairs(default_outputs) do
-        if not minetest.registered_nodes[default_name] then
-            error(("attempt to register unknown node \"%s\""):format(default_name))
+        local stack = ItemStack(default_name)
+        if not minetest.registered_items[stack:get_name()] then
+            error(("attempt to register unknown node \"%s\""):format(stack:get_name()))
         end
     end
 
@@ -101,12 +103,15 @@ function gravelsieve.api.register_output(input_name, output_name, relative_proba
     if mods_loaded then
         error("cannot update gravelsieve outputs after mods are loaded")
 
-    elseif not minetest.registered_nodes[output_name] then
-        error(("attempt to register unknown node \"%s\""):format(output_name))
-
     elseif outputs[input_name][output_name] then
         error(("re-registering output \"%s\" for \"%s\""):format(input_name, output_name))
     end
+
+    local stack = ItemStack(output_name)
+    if not minetest.registered_items[stack:get_name()] then
+        error(("attempt to register unknown node \"%s\""):format(stack:get_name()))
+    end
+
     outputs[input_name][output_name] = relative_probability
 end
 
@@ -114,8 +119,11 @@ function gravelsieve.api.override_output(input_name, output_name, relative_proba
     if mods_loaded then
         error("cannot update gravelsieve outputs after mods are loaded")
 
-    elseif not minetest.registered_nodes[output_name] then
-        error(("attempt to register unknown node \"%s\""):format(output_name))
+    end
+
+    local stack = ItemStack(output_name)
+    if not minetest.registered_items[stack:get_name()] then
+        error(("attempt to register unknown node \"%s\""):format(stack:get_name()))
     end
 
     outputs[input_name][output_name] = relative_probability
@@ -145,6 +153,7 @@ local function get_random_default(input_name)
         if t + value >= rv then
             return default_name
         end
+        t = t + value
         last_name = default_name
     end
     return last_name
@@ -158,6 +167,7 @@ local function get_random_output(input_name)
         if t + value >= rv then
             return output_name
         end
+        t = t + value
         last_name = output_name
     end
     return last_name
