@@ -1,25 +1,23 @@
 gravelsieve = {
-	-- Load support for I18n
-	S = minetest.get_translator("gravelsieve"),
+    -- Load support for I18n
+    S = minetest.get_translator("gravelsieve"),
 
-	version = "20210214.0",
+    version = "20210214.0",
 
-	modname = minetest.get_current_modname(),
-	modpath = minetest.get_modpath(minetest.get_current_modname()),
+    modname = minetest.get_current_modname(),
+    modpath = minetest.get_modpath(minetest.get_current_modname()),
 
-	log = function(level, message, ...)
-    	minetest.log(level, ("[%s] %s"):format(gravelsieve.modname, message:format(...)))
-	end
+    log = function(level, message, ...)
+        minetest.log(level, ("[%s] %s"):format(gravelsieve.modname, message:format(...)))
+    end
 }
 
 gravelsieve.log("info", "loading gravelsieve mod...")
 
 local function gs_dofile(filename)
-	dofile(("%s/%s"):format(gravelsieve.modpath, filename))
+    dofile(("%s/%s"):format(gravelsieve.modpath, filename))
 end
 
-
-gs_dofile("util.lua")
 gs_dofile("settings.lua")
 gs_dofile("api.lua")
 

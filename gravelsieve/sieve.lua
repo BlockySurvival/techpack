@@ -1,3 +1,4 @@
+gravelsieve.sieve = {}
 local S = gravelsieve.S
 local settings = gravelsieve.settings
 local api = gravelsieve.api
@@ -62,7 +63,7 @@ local function aging(pos, meta)
 end
 
 -- handle the sieve animation
-local function step_node(pos, meta, start)
+function gravelsieve.sieve.step_node(pos, meta, start)
     local node = minetest.get_node(pos)
     local idx = meta:get_int("idx")
     if start then
@@ -90,10 +91,10 @@ local function generate_output(inv, input_name)
 end
 
 -- move gravel and ores to dst
-local function move_src2dst(meta, pos, inv, input_name)
+local function process_input(meta, pos, inv, input_name)
     local input_stack = ItemStack(input_name)
     if inv:contains_item("src", input_stack) then
-        local is_done = step_node(pos, meta, false)
+        local is_done = gravelsieve.sieve.step_node(pos, meta, false)
         if is_done then
             -- time to move one item?
             if generate_output(inv, input_name) then
@@ -105,7 +106,7 @@ local function move_src2dst(meta, pos, inv, input_name)
     return false -- process still running
 end
 
-local function choose_intput_item(pos)
+local function choose_input_item(pos)
     local meta = minetest.get_meta(pos)
     local inv = meta:get_inventory()
     for i = 1, inv:get_size("src") do
@@ -121,10 +122,10 @@ end
 local function sieve_node_timer(pos, elapsed)
     local meta = minetest.get_meta(pos)
     local inv = meta:get_inventory()
-    local input_name = choose_intput_item(pos)
+    local input_name = choose_input_item(pos)
 
     if input_name then
-        if move_src2dst(meta, pos, inv, input_name) then
+        if process_input(meta, pos, inv, input_name) then
             aging(pos, meta)
             return true
         end
@@ -181,7 +182,7 @@ for automatic = 0, 1 do
                     local inv = meta:get_inventory()
                     if automatic == 0 then
                         local meta = minetest.get_meta(pos)
-                        step_node(pos, meta, true)
+                        gravelsieve.sieve.step_node(pos, meta, true)
                     else
                         minetest.get_node_timer(pos):start(settings.step_delay)
                     end
@@ -251,7 +252,7 @@ for automatic = 0, 1 do
             on_metadata_inventory_move = function(pos)
                 if automatic == 0 then
                     local meta = minetest.get_meta(pos)
-                    step_node(pos, meta, true)
+                    gravelsieve.sieve.step_node(pos, meta, true)
                 else
                     minetest.get_node_timer(pos):start(settings.step_delay)
                 end
@@ -264,7 +265,7 @@ for automatic = 0, 1 do
                     if inv:is_empty("src") then
                         -- sieve should be empty
                         meta:set_int("idx", 2)
-                        step_node(pos, meta, false)
+                        gravelsieve.sieve.step_node(pos, meta, false)
                         meta:set_int("gravel_cnt", 0)
                     end
                 else
@@ -275,7 +276,7 @@ for automatic = 0, 1 do
             on_metadata_inventory_put = function(pos)
                 if automatic == 0 then
                     local meta = minetest.get_meta(pos)
-                    step_node(pos, meta, true)
+                    gravelsieve.sieve.step_node(pos, meta, true)
                 else
                     minetest.get_node_timer(pos):start(settings.step_delay)
                 end
@@ -312,103 +313,4 @@ for automatic = 0, 1 do
             drop = node_name .. "3",
         })
     end
-end
-
-
-------------------------------------------------------------------------
--- Optional adaption to tubelib
-------------------------------------------------------------------------
-if minetest.global_exists("tubelib") then
-    minetest.register_node("gravelsieve:sieve_defect", {
-        tiles = {
-            -- up, down, right, left, back, front
-            "gravelsieve_top.png",
-            "gravelsieve_gravel.png",
-            "gravelsieve_auto_sieve.png^tubelib_defect.png",
-        },
-        drawtype = "nodebox",
-        node_box = {
-            type = "fixed",
-            fixed = {
-                { -8 / 16, -8 / 16, -8 / 16, 8 / 16, 4 / 16, -6 / 16 },
-                { -8 / 16, -8 / 16, 6 / 16, 8 / 16, 4 / 16, 8 / 16 },
-                { -8 / 16, -8 / 16, -8 / 16, -6 / 16, 4 / 16, 8 / 16 },
-                { 6 / 16, -8 / 16, -8 / 16, 8 / 16, 4 / 16, 8 / 16 },
-                { -6 / 16, -2 / 16, -6 / 16, 6 / 16, 2 / 16, 6 / 16 },
-            },
-        },
-        selection_box = {
-            type = "fixed",
-            fixed = { -8 / 16, -8 / 16, -8 / 16, 8 / 16, 4 / 16, 8 / 16 },
-        },
-
-        on_construct = function(pos)
-            local meta = minetest.get_meta(pos)
-            meta:set_int("idx", 0)        -- for the 4 sieve phases
-            meta:set_int("gravel_cnt", 0)   -- counter to switch between gravel and sieved gravel
-            meta:set_string("node_name", "gravelsieve:auto_sieve")
-            meta:set_string("formspec", sieve_formspec)
-            local inv = meta:get_inventory()
-            inv:set_size('src', 1)
-            inv:set_size('dst', 16)
-        end,
-
-        after_place_node = function(pos, placer)
-            local meta = minetest.get_meta(pos)
-            meta:set_string("infotext", S("Gravel Sieve"))
-        end,
-
-        on_dig = function(pos, node, puncher, pointed_thing)
-            local meta = minetest.get_meta(pos)
-            local inv = meta:get_inventory()
-            if inv:is_empty("dst") and inv:is_empty("src") then
-                minetest.node_dig(pos, node, puncher, pointed_thing)
-            end
-        end,
-
-        paramtype = "light",
-        sounds = default.node_sound_wood_defaults(),
-        paramtype2 = "facedir",
-        sunlight_propagates = true,
-        is_ground_content = false,
-        groups = { choppy = 2, cracky = 1, not_in_creative_inventory = 1 },
-    })
-
-    tubelib.register_node("gravelsieve:auto_sieve3",
-        {
-            "gravelsieve:auto_sieve0",
-            "gravelsieve:auto_sieve1",
-            "gravelsieve:auto_sieve2",
-            "gravelsieve:sieve_defect",
-        },
-        {
-            on_pull_item = function(pos, side)
-                local meta = minetest.get_meta(pos)
-                return tubelib.get_item(meta, "dst")
-            end,
-            on_push_item = function(pos, side, item)
-                minetest.get_node_timer(pos):start(settings.step_delay)
-                local meta = minetest.get_meta(pos)
-                return tubelib.put_item(meta, "src", item)
-            end,
-            on_unpull_item = function(pos, side, item)
-                local meta = minetest.get_meta(pos)
-                return tubelib.put_item(meta, "dst", item)
-            end,
-            on_node_load = function(pos)
-                minetest.get_node_timer(pos):start(settings.step_delay)
-            end,
-            on_node_repair = function(pos)
-                local meta = minetest.get_meta(pos)
-                meta:set_int("tubelib_aging", 0)
-                meta:set_int("idx", 2)
-                meta:set_string("node_name", "gravelsieve:auto_sieve")
-                local inv = meta:get_inventory()
-                inv:set_size('src', 1)
-                inv:set_size('dst', 16)
-                step_node(pos, meta, false)
-                minetest.get_node_timer(pos):start(settings.step_delay)
-                return true
-            end,
-    })
 end

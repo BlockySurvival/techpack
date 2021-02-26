@@ -1,10 +1,10 @@
 minetest.register_craft({
-	output = "gravelsieve:hammer",
-	recipe = {
-		{"", "default:steel_ingot", ""},
-		{"", "group:stick", "default:steel_ingot"},
-		{"group:stick", "", ""},
-	}
+    output = "gravelsieve:hammer",
+    recipe = {
+        { "", "default:steel_ingot", "" },
+        { "", "group:stick", "default:steel_ingot" },
+        { "group:stick", "", "" },
+    }
 })
 
 minetest.register_craft({
