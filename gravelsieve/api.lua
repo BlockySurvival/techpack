@@ -17,11 +17,11 @@ function gravelsieve.api.after_ores_calculated(callback)
 end
 
 minetest.register_on_mods_loaded(function()
-    gravelsieve.ore_probability = gravelsieve.api.get_ore_frequencies()
-    gravelsieve.api.report_probabilities(gravelsieve.ore_probability)
+    local ore_probability = gravelsieve.api.get_ore_frequencies()
+    gravelsieve.api.report_probabilities(ore_probability)
 
     for _,callback in ipairs(after_ores_calculated_callbacks) do
-        callback(gravelsieve.ore_probability)
+        callback(table.copy(ore_probability))
     end
 end)
 
@@ -33,7 +33,7 @@ gravelsieve.api.register_input("default:gravel", {
     ["default:coal_lump"] = 0.1
 })
 --]]
-function register_input(input_name, outputs, allow_override)
+function gravelsieve.api.register_input(input_name, outputs, allow_override)
 
     if not allow_override and gravelsieve.api.can_process(input_name) then
         error(("re-registering input \"%s\""):format(input_name))

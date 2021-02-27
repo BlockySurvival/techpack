@@ -77,19 +77,20 @@ local function pairs_by_values(t, f)
     end
 end
 
-function gravelsieve.api.report_probabilities(probabilties)
-    minetest.log("action", "[gravelsieve] ore probabilties:")
+function gravelsieve.api.report_probabilities(probabilities)
+    gravelsieve.log("action", "ore probabilities:")
     local overall_probability = 0.0
     for name,probability in pairs_by_values(probabilities) do
         gravelsieve.log("action", "%-32s: 1 / %.02f", name, 1.0/probability)
         overall_probability = overall_probability + probability
     end
-    gravelsieve.log("action", "[gravelsieve] Overall probability %f", overall_probability)
+    gravelsieve.log("action", "Overall probability %f", overall_probability)
 end
 
-function gravelsieve.api.sum_probabilities(probabilties)
+-- The following functions actually work for any table of numbers... perhaps this could be more generic?
+function gravelsieve.api.sum_probabilities(probabilities)
     local sum = 0.0
-    for _,probability in pairs(probabilties) do
+    for _,probability in pairs(probabilities) do
         sum = sum + probability
     end
     return sum
@@ -103,7 +104,7 @@ end
 
 function gravelsieve.api.scale_probabilities(probabilities, scale_factor)
     local scaled_probabilities = {}
-    for name,probability in pairs(probabilties) do
+    for name,probability in pairs(probabilities) do
         scaled_probabilities[name] = probability * scale_factor
     end
     return scaled_probabilities
