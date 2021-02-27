@@ -77,8 +77,8 @@ function gravelsieve.api.register_input(input_name, outputs, allow_override)
     end
 end
 
-function gravelsieve.api.override_input(...)
-    return gravelsieve.api.register_input(..., true)
+function gravelsieve.api.override_input(input_name, outputs)
+    return gravelsieve.api.register_input(input_name, outputs, true)
 end
 
 function gravelsieve.api.remove_input(input_name)
@@ -133,8 +133,8 @@ function gravelsieve.api.register_output(input_name, output_name, relative_proba
     processes[input_name][output_name] = relative_probability
     process_totals[input_name] = process_totals[input_name] + relative_probability - current_probability
 end
-function gravelsieve.api.override_output(...)
-    return gravelsieve.api.register_output(..., true)
+function gravelsieve.api.override_output(input_name, output_name, relative_probability)
+    return gravelsieve.api.register_output(input_name, output_name, relative_probability, true)
 end
 
 function gravelsieve.api.remove_output(input_name, output_name)
