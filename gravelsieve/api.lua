@@ -7,13 +7,14 @@ gravelsieve.api = {}
 
 local mods_loaded = false
 
-local inputs = {}
-local defaults = {}
-local default_totals = {}
-local outputs = {}
-local output_totals = {}
+local processes = {}
+local process_totals = {}
+local registered_processes = {}
 
 minetest.register_on_mods_loaded(function()
+    gravelsieve.ore_probability = get_ore_frequencies()
+    report_probabilities(gravelsieve.ore_probability)
+--[[
     for input_name, _ in pairs(inputs) do
         local default_total = 0.0
         local output_total = 0.0
@@ -26,23 +27,9 @@ minetest.register_on_mods_loaded(function()
         default_totals[input_name] = default_total
         output_totals[input_name] = output_total
     end
-
+]]
     mods_loaded = true
 end)
-
-local function get_random_default(input_name)
-    local random_value = math.random() * default_totals[input_name]
-    local running_total = 0
-    local last_name = ""
-    for default_name, value in pairs(defaults[input_name]) do
-        running_total = running_total + value
-        if running_total >= random_value then
-            return default_name
-        end
-        last_name = default_name
-    end
-    return last_name
-end
 
 local function get_random_output(input_name)
     local random_value = math.random() * output_totals[input_name]
@@ -60,11 +47,25 @@ end
 
 --[[
 e.g.
-gravelsieve.api.register_input("default:gravel", 0.8, {
+gravelsieve.api.register_input("default:gravel", {
     ["default:gravel"] = 1
     ["default:sand"] = 1
 })
 --]]
+
+function gravelsieve.api.register_input(input_name, output)
+    if mods_loaded then
+        -- This is here so you can do hard overrides after everything has loaded if you need to
+        -- Otherwise the order mods are loaded may cause them to override your configs
+        -- local current_config = gravelsieve.process_probabilities
+        -- current_config = configure_probabilities_step(current_config, funct_or_table)
+        -- gravelsieve.process_probabilities = normalize_config(current_config)
+    else
+        -- Build up a list of callbacks to be run after all mods are loaded
+        table.insert(registered_processes, funct_or_table)
+    end
+end
+
 function gravelsieve.api.register_input(input_name, default_chance, default_outputs)
     if mods_loaded then
         error("cannot update gravelsieve outputs after mods are loaded")
