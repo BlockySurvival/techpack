@@ -22,7 +22,7 @@ local function parse_drop(drop)
 end
 
 -- collect all registered ores and calculate the probability
-local function get_ore_frequencies()
+function gravelsieve.api.get_ore_frequencies()
     local ore_frequencies = {}
     for _,item in  pairs(minetest.registered_ores) do
         if minetest.registered_nodes[item.ore] then
@@ -54,7 +54,6 @@ local function get_ore_frequencies()
     return ore_frequencies
 end
 
-
 local function pairs_by_values(t, f)
     if not f then
         f = function(a, b) return a > b end
@@ -78,17 +77,18 @@ local function pairs_by_values(t, f)
     end
 end
 
-local function report_probabilities(probabilties)
+function gravelsieve.api.report_probabilities(probabilties)
     minetest.log("action", "[gravelsieve] ore probabilties:")
     local overall_probability = 0.0
     for name,probability in pairs_by_values(probabilities) do
-        minetest.log("action", ("[gravelsieve] %-32s: 1 / %.02f"):format(name, 1.0/probability))
+        gravelsieve.log("action", "%-32s: 1 / %.02f", name, 1.0/probability)
         overall_probability = overall_probability + probability
     end
-    minetest.log("action", ("[gravelsieve] Overall probability %f"):format(overall_probability))
+    gravelsieve.log("action", "[gravelsieve] Overall probability %f", overall_probability)
 end
+
 function gravelsieve.api.sum_probabilities(probabilties)
-    local sum = 0
+    local sum = 0.0
     for _,probability in pairs(probabilties) do
         sum = sum + probability
     end
