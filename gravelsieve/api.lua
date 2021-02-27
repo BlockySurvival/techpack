@@ -8,28 +8,42 @@ gravelsieve.api = {}
 local processes = {}
 local process_totals = {}
 
+local ore_frequencies = {}
+local ores_calculated = false
 local after_ores_calculated_callbacks = {}
 function gravelsieve.api.after_ores_calculated(callback)
+
     if type(callback) ~= 'function' then
         error("Gravelsieve after_ores_calculated callbacks must be functions.")
     end
-    table.insert(after_ores_calculated_callbacks, callback)
+
+    if ores_calculated then
+        callback(table.copy(ore_frequencies))
+    else
+        table.insert(after_ores_calculated_callbacks, callback)
+    end
 end
 
 minetest.register_on_mods_loaded(function()
-    local ore_probability = gravelsieve.api.get_ore_frequencies()
-    gravelsieve.api.report_probabilities(ore_probability)
-
+    ore_frequencies = gravelsieve.api.get_ore_frequencies()
+    gravelsieve.api.report_probabilities(ore_frequencies)
+    ores_calculated = true
     for _,callback in ipairs(after_ores_calculated_callbacks) do
-        callback(table.copy(ore_probability))
+        callback(table.copy(ore_frequencies))
     end
+    after_ores_calculated_callbacks = nil
 end)
+
+function gravelsieve.api.reset_config()
+    processes = {}
+    process_totals = {}
+end
 
 --[[
 e.g.
 gravelsieve.api.register_input("default:gravel", {
-    ["default:gravel"] = 1
-    ["default:sand"] = 1
+    ["default:gravel"] = 1,
+    ["default:sand"] = 1,
     ["default:coal_lump"] = 0.1
 })
 --]]
@@ -76,7 +90,7 @@ function gravelsieve.api.remove_input(input_name)
 
     local output = processes[input_name]
     processes[input_name] = nil
-    processes_totals[input_name] = nil
+    process_totals[input_name] = nil
     return output
 end
 

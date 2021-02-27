@@ -1,7 +1,4 @@
 
-
-gravelsieve.ore_probability = {}
-
 local y_spread = math.max(1 + gravelsieve.settings.ore_max_elevation - gravelsieve.settings.ore_min_elevation, 1)
 local function calculate_probability(item)
     local ymax = math.min(item.y_max, gravelsieve.settings.ore_max_elevation)
