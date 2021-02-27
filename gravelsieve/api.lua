@@ -24,6 +24,12 @@ minetest.register_on_mods_loaded(function()
         for _, value in pairs(outputs[input_name]) do
             output_total = output_total + value
         end
+        if default_total == 0.0 then
+            error(("[gravelsieve] no default items registered for \"%s\""):format(input_name))
+        end
+        if output_total == 0.0 then
+            error(("[gravelsieve] no output items registered for \"%s\""):format(input_name))
+        end
         default_totals[input_name] = default_total
         output_totals[input_name] = output_total
     end
