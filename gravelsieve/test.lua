@@ -229,7 +229,7 @@ describe("gravelsieve", function ()
                 }
                 api.register_input("default:gravel", output)
 
-                local registered_output = api.get_outputs("default:gravel")
+                local registered_output = api.get_outputs("default:gravel", "relative")
 
                 assert_equal(registered_output, output, "Output should be properly retrieved")
             end)
@@ -243,9 +243,9 @@ describe("gravelsieve", function ()
 
                 api.register_input("default:gravel", output)
 
-                local registered_output1 = api.get_outputs("default:gravel")
+                local registered_output1 = api.get_outputs("default:gravel", "relative")
                 registered_output1["default:gravel"] = 100
-                local registered_output2 = api.get_outputs("default:gravel")
+                local registered_output2 = api.get_outputs("default:gravel", "relative")
 
                 assert_not_equal(registered_output1, registered_output2, "Output should not be modified")
                 assert_equal(registered_output2, output, "Original output should remain the same when modified")
@@ -255,14 +255,14 @@ describe("gravelsieve", function ()
         describe("register_input", function ()
             it("registers an input with no output", function ()
                 api.register_input("default:gravel")
-                local registered_output = api.get_outputs("default:gravel")
+                local registered_output = api.get_outputs("default:gravel", "relative")
 
                 assert_equal(registered_output, {}, "Should be registered properly")
             end)
 
             it("registers an input with a string output", function ()
                 api.register_input("default:gravel", "default:sand")
-                local registered_output = api.get_outputs("default:gravel")
+                local registered_output = api.get_outputs("default:gravel", "relative")
 
                 assert_equal(registered_output, {["default:sand"] = 1}, "Should be registered properly")
             end)
@@ -275,7 +275,7 @@ describe("gravelsieve", function ()
                 }
                 api.register_input("default:gravel", output)
 
-                local registered_output = api.get_outputs("default:gravel")
+                local registered_output = api.get_outputs("default:gravel", "relative")
 
                 assert_equal(registered_output, output, "Should be registered properly")
             end)
@@ -287,10 +287,10 @@ describe("gravelsieve", function ()
                 api.register_input("default:gravel")
             end)
 
-            it("does allow a previously registered input to be registered again if allow_override is switched on", function ()
-                api.register_input("default:gravel")
-                api.register_input("default:gravel", {}, true)
-            end)
+            -- it("does allow a previously registered input to be registered again if allow_override is switched on", function ()
+            --     api.register_input("default:gravel")
+            --     api.register_input("default:gravel", {}, true)
+            -- end)
 
             it("does allow a previously registered input to be registered again", function ()
                 api.register_input("default:gravel")
@@ -336,7 +336,7 @@ describe("gravelsieve", function ()
                 api.register_input("default:gravel", output)
                 local registered_output = api.remove_input("default:gravel")
 
-                assert_equal(registered_output, output, "Should return proper result")
+                assert_equal(registered_output, {relative=output,dynamic={},fixed={}}, "Should return proper result")
             end)
         end)
 
@@ -353,7 +353,7 @@ describe("gravelsieve", function ()
                 local output = {["default:sand"]=1}
                 api.register_input("default:gravel", output)
                 api.swap_input("default:gravel", "default:sand")
-                local registered_output = api.get_outputs("default:sand")
+                local registered_output = api.get_outputs("default:sand", "relative")
 
                 assert_equal(registered_output, output, "Should be properly swapped")
             end)
@@ -364,7 +364,7 @@ describe("gravelsieve", function ()
             it("registers an output to an input", function ()
                 api.register_input("default:gravel")
                 api.register_output("default:gravel", "default:sand", 0.1)
-                local registered_output = api.get_outputs("default:gravel")
+                local registered_output = api.get_outputs("default:gravel", "relative")
 
                 assert_equal(registered_output, {["default:sand"]=0.1}, "Output should be registered properly")
             end)
@@ -377,24 +377,24 @@ describe("gravelsieve", function ()
             end)
 
             it("does not allow a previously registered output to be registered again", function ()
-                expect_error("re-registering output \"default:gravel\" for \"default:sand\"")
+                expect_error("re-registering relative output \"default:gravel\" for \"default:sand\"")
 
                 api.register_input("default:gravel", "default:sand")
                 api.register_output("default:gravel", "default:sand", 1)
             end)
 
-            it("does allow a previously registered output to be registered again if allow_override is switched on", function ()
-                api.register_input("default:gravel", "default:sand")
-                api.register_output("default:gravel", "default:sand", 0.1, true)
-                local registered_output = api.get_outputs("default:gravel")
+            -- it("does allow a previously registered output to be registered again if allow_override is switched on", function ()
+            --     api.register_input("default:gravel", "default:sand")
+            --     api.register_output("default:gravel", "default:sand", 0.1, true)
+            --     local registered_output = api.get_outputs("default:gravel", "relative")
 
-                assert_equal(registered_output, {["default:sand"]=0.1}, "Output should be overridden properly")
-            end)
+            --     assert_equal(registered_output, {["default:sand"]=0.1}, "Output should be overridden properly")
+            -- end)
 
             it("does allow a previously registered output to be registered again", function ()
                 api.register_input("default:gravel", "default:sand")
                 api.override_output("default:gravel", "default:sand", 0.1)
-                local registered_output = api.get_outputs("default:gravel")
+                local registered_output = api.get_outputs("default:gravel", "relative")
                 
                 assert_equal(registered_output, {["default:sand"]=0.1}, "Output should be overridden properly")
             end)
@@ -423,7 +423,7 @@ describe("gravelsieve", function ()
 
                 api.remove_output("default:gravel", "default:coal_lump")
 
-                local registered_output = api.get_outputs("default:gravel")
+                local registered_output = api.get_outputs("default:gravel", "relative")
 
                 assert_equal(registered_output, expected_output, "Should be removed properly")
 
@@ -448,7 +448,7 @@ describe("gravelsieve", function ()
                 api.register_input("default:gravel", output)
                 api.swap_output("default:gravel", "default:coal_lump", "default:iron_lump")
 
-                local registered_output = api.get_outputs("default:gravel")
+                local registered_output = api.get_outputs("default:gravel", "relative")
 
                 assert_equal(registered_output["default:coal_lump"], nil, "Old output should be properly removed")
             end)
@@ -461,7 +461,7 @@ describe("gravelsieve", function ()
                 api.register_input("default:gravel", output)
                 api.swap_output("default:gravel", "default:coal_lump", "default:iron_lump")
 
-                local registered_output = api.get_outputs("default:gravel")
+                local registered_output = api.get_outputs("default:gravel", "relative")
 
                 assert_equal(registered_output["default:iron_lump"], 0.1, "New output should be properly added")
             end)

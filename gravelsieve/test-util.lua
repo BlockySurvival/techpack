@@ -14,12 +14,12 @@ local function table_eq(a,b)
         return false
     end
     for k,v in pairs(a) do
-        if b[k] ~= v then
+        if not table_eq(b[k],v) then
             return false
         end
     end
     for k,v in pairs(b) do
-        if a[k] ~= v then
+        if not table_eq(a[k],v) then
             return false
         end
     end
