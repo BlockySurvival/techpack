@@ -203,6 +203,18 @@ function gravelsieve.api.register_output(input_name, output_name, probability, o
     end
 end
 
+function gravelsieve.api.register_relative_output(input_name, output_name, probability)
+    return gravelsieve.api.register_output(input_name, output_name, probability, "relative")
+end
+
+function gravelsieve.api.register_dynamic_output(input_name, output_name, probability)
+    return gravelsieve.api.register_output(input_name, output_name, probability, "dynmaic")
+end
+
+function gravelsieve.api.register_fixed_output(input_name, output_name, probability)
+    return gravelsieve.api.register_output(input_name, output_name, probability, "fixed")
+end
+
 function gravelsieve.api.override_output(input_name, output_name, probability, output_type)
     gravelsieve.api.remove_output(input_name, output_name)
     return gravelsieve.api.register_output(input_name, output_name, probability, output_type)
@@ -255,12 +267,15 @@ local function get_random_output(probabilities, total)
     return last_name
 end
 
-local function evaluate_dynamic_outputs(outputs, args)
+local function evaluate_dynamic_outputs(outputs, dynamic_args_generator, args)
     local total = 0
     local probabilities = {}
-
-    for output_name, generator in pairs(outputs) do
-        local value = generator(args, output_name, total)
+    local dynamic_args
+    for output_name, dynamic_value_generator in pairs(outputs) do
+        if not dynamic_args then
+            dynamic_args = dynamic_args_generator(args)
+        end
+        local value = dynamic_value_generator(dynamic_args, output_name, total)
         probabilities[output_name] = value
         total = total + value
     end
@@ -268,7 +283,7 @@ local function evaluate_dynamic_outputs(outputs, args)
     return probabilities, total
 end
 
-function gravelsieve.api.get_random_output(input_name, ...)
+function gravelsieve.api.get_random_output(input_name, dynamic_args_generator, args)
 
     if not gravelsieve.api.can_process(input_name) then
         gravelsieve.log("warning", "can't get random output for unregistered input \"%s\"", input_name)
@@ -283,7 +298,7 @@ function gravelsieve.api.get_random_output(input_name, ...)
         return get_random_output(process["fixed"], fixed_total)
     end
 
-    local dynamic_probabilities, dynamic_total = evaluate_dynamic_outputs(process["dynamic"], {...})
+    local dynamic_probabilities, dynamic_total = evaluate_dynamic_outputs(process["dynamic"], dynamic_args_generator, args)
     if dynamic_total > 0 and fixed_total+dynamic_total < random_value then
         return get_random_output(dynamic_probabilities, dynamic_total)
     end
@@ -292,3 +307,52 @@ function gravelsieve.api.get_random_output(input_name, ...)
 end
 
 
+local function get_pos_list(player)
+    return minetest.deserialize(player:get_attribute("techpack_gravelsieves")) or {}
+end
+
+local function set_pos_list(player, lPos)
+    player:set_attribute("techpack_gravelsieves", minetest.serialize(lPos))
+end
+
+local function find_in_list(list, member)
+    for key, val in ipairs(list) do
+        if vector.equals(val, member) then
+            return key
+        end
+    end
+end
+
+local function remove_list_elem(list, member)
+    local key = find_in_list(list, member)
+    if key then
+        table.remove(list, key)
+    end
+    return list
+end
+
+local function add_pos(pos, player)
+    local lPos = get_pos_list(player)
+    if not find_in_list(lPos, pos) then
+        lPos[#lPos+1] = pos
+        set_pos_list(player, lPos)
+        return true
+    end
+    return false
+end
+
+local function del_pos(pos, player)
+    local lPos = get_pos_list(player)
+    lPos = remove_list_elem(lPos, pos)
+    set_pos_list(player, lPos)
+end
+
+local function get_count(player)
+    return #get_pos_list(player)
+end
+
+gravelsieve.api.count = {
+    add = add_pos,
+    del = del_pos,
+    get = get_count
+}
