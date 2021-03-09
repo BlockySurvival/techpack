@@ -250,8 +250,7 @@ function gravelsieve.api.can_process(input_name)
     return processes[input_name] ~= nil
 end
 
-local function get_random_output(probabilities, total)
-    local random_value = math.random() * total
+local function get_random_output(probabilities, random_value)
     local running_total = 0
     local last_name = ""
     for output_name, value in pairs(probabilities) do
@@ -267,20 +266,19 @@ local function get_random_output(probabilities, total)
     return last_name
 end
 
-local function evaluate_dynamic_outputs(outputs, dynamic_args_generator, args)
-    local total = 0
-    local probabilities = {}
+local function get_random_dynamic_output(probabilities, random_value, dynamic_args_generator, args)
+    local running_total = 0
     local dynamic_args
-    for output_name, dynamic_value_generator in pairs(outputs) do
+    for output_name, dynamic_value_generator in pairs(probabilities) do
         if not dynamic_args then
             dynamic_args = dynamic_args_generator(args)
         end
-        local value = dynamic_value_generator(dynamic_args, output_name, total)
-        probabilities[output_name] = value
-        total = total + value
+        local value = dynamic_value_generator(dynamic_args, output_name, running_total)
+        running_total = running_total + value
+        if running_total >= random_value then
+            return output_name
+        end
     end
-
-    return probabilities, total
 end
 
 function gravelsieve.api.get_random_output(input_name, dynamic_args_generator, args)
@@ -295,15 +293,15 @@ function gravelsieve.api.get_random_output(input_name, dynamic_args_generator, a
 
     local fixed_total = process_totals[input_name]["fixed"]
     if fixed_total > 0 and fixed_total >= random_value then
-        return get_random_output(process["fixed"], fixed_total)
+        return get_random_output(process["fixed"], fixed_total * random_value)
     end
 
-    local dynamic_probabilities, dynamic_total = evaluate_dynamic_outputs(process["dynamic"], dynamic_args_generator, args)
-    if dynamic_total > 0 and fixed_total+dynamic_total >= random_value then
-        return get_random_output(dynamic_probabilities, dynamic_total)
+    local dynamic_output = get_random_dynamic_output(process["dynamic"], random_value-fixed_total, dynamic_args_generator, args)
+    if dynamic_output then
+        return dynamic_output
     end
 
-    return get_random_output(process["relative"], process_totals[input_name]["relative"])
+    return get_random_output(process["relative"], process_totals[input_name]["relative"] * random_value)
 end
 
 
