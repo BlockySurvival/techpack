@@ -1,3 +1,5 @@
+local S = gravelsieve.S
+
 minetest.register_node("gravelsieve:sieved_gravel", {
     description = S("Sieved Gravel"),
     tiles = { "default_gravel.png" },
