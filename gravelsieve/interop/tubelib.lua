@@ -5,6 +5,8 @@ if not minetest.global_exists("tubelib") then
     return
 end
 
+local settings = gravelsieve.settings
+
 minetest.register_node("gravelsieve:sieve_defect", {
     tiles = {
         -- up, down, right, left, back, front
