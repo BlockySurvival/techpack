@@ -57,7 +57,7 @@ minetest.register_node("gravelsieve:sieve_defect", {
     end,
     after_dig_node = function (pos, oldnode, oldmetadata, digger)
         gravelsieve.api.count.del(pos, digger)
-    end
+    end,
 
     paramtype = "light",
     sounds = default.node_sound_wood_defaults(),
