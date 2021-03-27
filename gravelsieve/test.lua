@@ -1,16 +1,16 @@
 -- Automatic...ish tests for api methods
+if not minetest.global_exists('test') then return end
+
+local describe = test.describe
+local it = test.it
+local stub = test.stub
+local before_each = test.before_each
+local after_all = test.after_all
+local assert_equal = test.assert.equal
+local assert_not_equal = test.assert.not_equal
+local expect_error = test.expect.error
+
 local api = gravelsieve.api
-
-dofile(("%s/%s"):format(gravelsieve.modpath, "test-util.lua"))
-
-local describe = tests.describe
-local it = tests.it
-local stub = tests.stub
-local before_each = tests.before_each
-local after_all = tests.after_all
-local assert_equal = tests.assert.equal
-local assert_not_equal = tests.assert.not_equal
-local expect_error = tests.expect.error
 
 describe("gravelsieve", function ()
     local log_stub = stub()
@@ -504,4 +504,4 @@ describe("gravelsieve", function ()
     end)
 end)
 
-tests.execute()
+test.execute()
