@@ -1,8 +1,13 @@
 gravelsieve.settings = {}
 
-local mt_settings = minetest.settings
+local settings_get
+if minetest.setting_get then
+	settings_get = minetest.setting_get
+else
+	settings_get = function(...) return minetest.settings:get(...) end
+end
 
-gravelsieve.settings.step_delay = tonumber(mt_settings:get("gravelsieve.step_delay")) or 1.0
+gravelsieve.settings.step_delay = tonumber(settings_get("gravelsieve.step_delay")) or 1.0
 
 -- tubelib aging feature
 if minetest.get_modpath("tubelib") and tubelib ~= nil then
