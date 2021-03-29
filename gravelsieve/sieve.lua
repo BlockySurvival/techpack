@@ -79,9 +79,21 @@ function gravelsieve.sieve.step_node(pos, meta, start)
     return idx == 3
 end
 
+
+local function dynamic_args_generator(args)
+    local dynamic_args = {}
+    local player_name = args.meta:get_string("player_name")
+    if player_name then
+        local player = minetest.get_player_by_name(player_name)
+        if not player then return {} end -- player is not logged in, this shouldn't happen
+        dynamic_args = {player_name=player_name,player=player,sieve_count=api.count.get(player)}
+    end
+    return dynamic_args
+end
+
 -- place ores to dst according to the calculated probability
-local function generate_output(inv, input_name)
-    local output = api.get_random_output(input_name)
+local function generate_output(inv, input_name, args)
+    local output = api.get_random_output(input_name, dynamic_args_generator, args)
     local output_item = ItemStack(output)
     if inv:room_for_item("dst", output_item) then
         inv:add_item("dst", output_item)
@@ -97,7 +109,7 @@ local function process_input(meta, pos, inv, input_name)
         local is_done = gravelsieve.sieve.step_node(pos, meta, false)
         if is_done then
             -- time to move one item?
-            if generate_output(inv, input_name) then
+            if generate_output(inv, input_name, {meta=meta}) then
                 inv:remove_item("src", input_stack)
             end
         end
@@ -236,12 +248,19 @@ for automatic = 0, 1 do
                 inv:set_size('dst', 16)
             end,
 
-            -- Pipeworks support
-            after_dig_node = pipeworks_after_dig,
+            after_dig_node = function (pos, oldnode, oldmetadata, digger)
+                api.count.del(pos, digger)
+                -- Pipeworks support
+                if pipeworks_after_dig then
+                    pipeworks_after_dig(pos, oldnode, oldmetadata, digger)
+                end
+            end,
 
             after_place_node = function(pos, placer)
                 local meta = minetest.get_meta(pos)
                 meta:set_string("infotext", "Gravel Sieve")
+                meta:set_string("player_name", placer:get_player_name())
+                api.count.add(pos, placer)
 
                 -- Pipeworks support
                 if pipeworks_after_place then

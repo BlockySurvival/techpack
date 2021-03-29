@@ -20,6 +20,9 @@ end
 
 gs_dofile("settings.lua")
 gs_dofile("api.lua")
+gs_dofile("probability_api.lua")
+
+gs_dofile("test.lua")
 
 gs_dofile("sieve.lua")
 gs_dofile("nodes.lua")

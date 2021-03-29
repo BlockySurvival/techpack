@@ -44,6 +44,8 @@ minetest.register_node("gravelsieve:sieve_defect", {
     after_place_node = function(pos, placer)
         local meta = minetest.get_meta(pos)
         meta:set_string("infotext", S("Gravel Sieve"))
+        meta:set_string("player_name", placer:get_player_name())
+        gravelsieve.api.count.add(pos, placer)
     end,
 
     on_dig = function(pos, node, puncher, pointed_thing)
@@ -52,6 +54,9 @@ minetest.register_node("gravelsieve:sieve_defect", {
         if inv:is_empty("dst") and inv:is_empty("src") then
             minetest.node_dig(pos, node, puncher, pointed_thing)
         end
+    end,
+    after_dig_node = function (pos, oldnode, oldmetadata, digger)
+        gravelsieve.api.count.del(pos, digger)
     end,
 
     paramtype = "light",
