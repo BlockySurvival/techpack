@@ -293,7 +293,7 @@ function gravelsieve.api.get_random_output(input_name, dynamic_args_generator, a
 
     local fixed_total = process_totals[input_name]["fixed"]
     if fixed_total > 0 and fixed_total >= random_value then
-        return get_random_output(process["fixed"], fixed_total * random_value)
+        return get_random_output(process["fixed"], random_value)
     end
 
     local dynamic_output = get_random_dynamic_output(process["dynamic"], random_value-fixed_total, dynamic_args_generator, args)
@@ -301,7 +301,7 @@ function gravelsieve.api.get_random_output(input_name, dynamic_args_generator, a
         return dynamic_output
     end
 
-    return get_random_output(process["relative"], process_totals[input_name]["relative"] * random_value)
+    return get_random_output(process["relative"], process_totals[input_name]["relative"] * math.random())
 end
 
 
