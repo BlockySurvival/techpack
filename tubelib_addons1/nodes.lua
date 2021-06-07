@@ -57,6 +57,13 @@ tn("default:pine_tree",   "default:pine_tree",   "default:pine_sapling")
 tn("default:acacia_tree", "default:acacia_tree", "default:acacia_sapling")
 tn("default:jungletree",  "default:jungletree",  "default:junglesapling")
 
+tn("default:bush_stem", "default:bush_stem", "default:bush_sapling")
+tn("default:acacia_bush_stem", "default:acacia_bush_stem", "default:acacia_bush_sapling")
+tn("default:pine_bush_stem", "default:pine_bush_stem", "default:pine_bush_sapling")
+
+fn("default:pine_bush_needles")
+tubelib_addons1.FarmingNodes["default:pine_bush_needles"].leaves = true -- accepted as leaves
+
 fn("default:leaves")
 fn("default:aspen_leaves")
 fn("default:pine_needles")
@@ -118,7 +125,7 @@ end
 -------------------------------------------------------------------------------
 -- Ethereal Farming
 -------------------------------------------------------------------------------
-fn("ethereal:strawberry_8",   "ethereal:strawberry 2",	     "ethereal:strawberry 1")
+fn("ethereal:strawberry_8",   "ethereal:strawberry 2",	     "ethereal:strawberry_1")
 fn("ethereal:onion_5",        "ethereal:wild_onion_plant 2", "ethereal:onion_1")
 
 
@@ -254,6 +261,21 @@ gn("ethereal:illumishroom")
 gn("ethereal:illumishroom2")
 gn("ethereal:illumishroom3")
 
+-------------------------------------------------------------------------------
+-- underch Ground
+-------------------------------------------------------------------------------
+
+if minetest.get_modpath("underch") then
+	for regnodename,v in pairs(minetest.registered_nodes) do
+		if string.find(regnodename, "underch:") then
+			if string.find(regnodename, "_cobble") and not string.find(regnodename, "_wall") then
+				gnname = string.gsub(regnodename, "_cobble", "")
+				print("tubelib_addons1.register_ground_node: " .. gnname)
+				gn(gnname, regnodename)
+			end
+		end
+	end
+end
 
 -------------------------------------------------------------------------------
 -- Registered flowers
