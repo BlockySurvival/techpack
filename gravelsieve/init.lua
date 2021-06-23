@@ -18,6 +18,15 @@ local function gs_dofile(filename)
     dofile(("%s/%s"):format(gravelsieve.modpath, filename))
 end
 
+if minetest.global_exists("unified_inventory") then
+	unified_inventory.register_craft_type("sieving", {
+		description = S("Sieving (by chance)"),
+		icon = "gravelsieve_sieve.png",
+		width = 1,
+		height = 1,
+	})
+end
+
 gs_dofile("settings.lua")
 gs_dofile("api.lua")
 gs_dofile("probability_api.lua")

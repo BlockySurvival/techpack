@@ -46,6 +46,22 @@ function gravelsieve.api.reset_config()
     process_totals = {}
 end
 
+local function clear_unified_inventory_craft(input_name, output_name)
+    local crafts = unified_inventory.crafts_for.recipe[ItemStack(output_name):get_name()]
+    if crafts then
+        for i, craft in ipairs(crafts) do
+            if craft.type == "sieving"
+            and craft.output == output_name
+            and #craft.items == 1
+            and craft.items[1] == input_name
+            then
+                table.remove(crafts, i)
+                break
+            end
+        end
+    end
+end
+
 --[[
 e.g.
 gravelsieve.api.register_input("default:gravel", {
@@ -117,6 +133,13 @@ function gravelsieve.api.remove_input(input_name)
     end
 
     local output = processes[input_name]
+    if minetest.global_exists("unified_inventory") then
+        for output_type, type_outputs in pairs(output) do
+            for output_name,_ in pairs(type_outputs) do
+                clear_unified_inventory_craft(input_name, output_name)
+            end
+        end
+    end
     processes[input_name] = nil
     process_totals[input_name] = nil
     return output
@@ -201,6 +224,14 @@ function gravelsieve.api.register_output(input_name, output_name, probability, o
     if output_type_has_total(output_type) then
         process_totals[input_name][output_type] = process_totals[input_name][output_type] + probability
     end
+
+    if minetest.global_exists("unified_inventory") then
+        unified_inventory.register_craft({
+            items = {input_name},
+            output = output_name,
+            type = "sieving"
+        })
+    end
 end
 
 function gravelsieve.api.register_relative_output(input_name, output_name, probability)
@@ -238,6 +269,11 @@ function gravelsieve.api.remove_output(input_name, output_name)
     if output_type_has_total(output_type) then
         process_totals[input_name][existing_type] = process_totals[input_name][existing_type] - existing_value
     end
+
+    if minetest.global_exists("unified_inventory") then
+        clear_unified_inventory_craft(input_name, output_name)
+    end
+
     return existing_value, existing_type
 end
 
