@@ -46,6 +46,7 @@ function gravelsieve.api.reset_config()
     process_totals = {}
 end
 
+local unified_inventory_enabled = minetest.global_exists("unified_inventory")
 local function clear_unified_inventory_craft(input_name, output_name)
     local crafts = unified_inventory.crafts_for.recipe[ItemStack(output_name):get_name()]
     if crafts then
@@ -133,7 +134,7 @@ function gravelsieve.api.remove_input(input_name)
     end
 
     local output = processes[input_name]
-    if minetest.global_exists("unified_inventory") then
+    if unified_inventory_enabled then
         for output_type, type_outputs in pairs(output) do
             for output_name,_ in pairs(type_outputs) do
                 clear_unified_inventory_craft(input_name, output_name)
@@ -225,7 +226,7 @@ function gravelsieve.api.register_output(input_name, output_name, probability, o
         process_totals[input_name][output_type] = process_totals[input_name][output_type] + probability
     end
 
-    if minetest.global_exists("unified_inventory") then
+    if unified_inventory_enabled then
         unified_inventory.register_craft({
             items = {input_name},
             output = output_name,
@@ -270,7 +271,7 @@ function gravelsieve.api.remove_output(input_name, output_name)
         process_totals[input_name][existing_type] = process_totals[input_name][existing_type] - existing_value
     end
 
-    if minetest.global_exists("unified_inventory") then
+    if unified_inventory_enabled then
         clear_unified_inventory_craft(input_name, output_name)
     end
 
