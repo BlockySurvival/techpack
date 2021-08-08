@@ -324,7 +324,6 @@ tubelib.add_grinder_recipe({input="default:desert_cobble", output="default:grave
 tubelib.add_grinder_recipe({input="default:mossycobble", output="default:gravel"})
 tubelib.add_grinder_recipe({input="default:gravel", output="default:sand"})
 tubelib.add_grinder_recipe({input="gravelsieve:sieved_gravel", output="default:sand"})
-tubelib.add_grinder_recipe({input="default:coral_skeleton", output="default:silver_sand"})
 tubelib.add_grinder_recipe({input="tubelib:basalt_stone", output="default:silver_sand"})
 
 if minetest.global_exists("skytest") then
