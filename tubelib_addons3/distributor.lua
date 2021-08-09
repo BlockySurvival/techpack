@@ -244,6 +244,12 @@ local function distributing(pos, meta)
 				rearrange_table(kvFilterItemNames[name])
 				busy = true
 				break
+			elseif num ~= stack:get_count() then
+				local color = Side2Color[side]
+				counter[color] = counter[color] + stack:get_count()
+				rearrange_table(kvFilterItemNames[name])
+				busy = true
+				break
 			end
 		end
 		
@@ -257,6 +263,10 @@ local function distributing(pos, meta)
 					counter[color] = counter[color] + num
 					busy = true
 				end
+			elseif num ~= stack:get_count() then
+				local color = Side2Color[side]
+				counter[color] = counter[color] + stack:get_count()
+				busy = true
 			end
 		end
 	end
@@ -285,7 +295,7 @@ local function on_receive_fields(pos, formname, fields, player)
 		return
 	end
 	local meta = M(pos)
-	local filter = minetest.deserialize(meta:get_string("filter"))
+	local filter = minetest.deserialize(meta:get_string("filter")) or {false,false,false,false}
 	if fields.filter1 ~= nil then
 		filter[1] = fields.filter1 == "true"
 	elseif fields.filter2 ~= nil then
@@ -310,7 +320,7 @@ end
 local function change_filter_settings(pos, slot, val)
 	local slots = {["red"] = 1, ["green"] = 2, ["blue"] = 3, ["yellow"] = 4}
 	local meta = M(pos)
-	local filter = minetest.deserialize(meta:get_string("filter"))
+	local filter = minetest.deserialize(meta:get_string("filter")) or {false,false,false,false}
 	local num = slots[slot] or 1
 	if num >= 1 and num <= 4 then
 		filter[num] = val == "on"
@@ -498,6 +508,9 @@ tubelib.register_node("tubelib_addons3:distributor",
 	{"tubelib_addons3:distributor_active", "tubelib_addons3:distributor_defect"}, {
 	on_pull_item = function(pos, side)
 		return tubelib.get_item(M(pos), "src")
+	end,
+	on_pull_stack = function(pos, side)
+		return tubelib.get_stack(M(pos), "src")
 	end,
 	on_push_item = function(pos, side, item)
 		return tubelib.put_item(M(pos), "src", item)
