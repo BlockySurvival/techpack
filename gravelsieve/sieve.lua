@@ -337,6 +337,7 @@ for automatic = 0, 1 do
             is_ground_content = false,
             groups = { choppy = 2, cracky = 1, not_in_creative_inventory = not_in_creative_inventory, tubedevice = 1, tubedevice_receiver = 1 },
             drop = node_name .. "3",
+        	on_blast = function() end,
         })
     end
 end
