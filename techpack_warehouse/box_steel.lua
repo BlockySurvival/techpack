@@ -7,7 +7,7 @@
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	box_steel.lua
 
 ]]--
@@ -23,20 +23,20 @@ local wh = techpack_warehouse
 local NODE_NAME = "techpack_warehouse:box_steel"
 local DESCRIPTION = S("Warehouse Box Steel")
 local INV_SIZE = 400
-local BACKGROUND_IMG = "default_steel_block.png" 
+local BACKGROUND_IMG = "default_steel_block.png"
 
 
 local Box = wh.Box:new({
-	node_name = NODE_NAME, 
-	description = DESCRIPTION, 
-	inv_size = INV_SIZE, 
+	node_name = NODE_NAME,
+	description = DESCRIPTION,
+	inv_size = INV_SIZE,
 	background_img = BACKGROUND_IMG,
-}) 
+})
 
 minetest.register_node(NODE_NAME, {
 	description = DESCRIPTION.." (8 x "..INV_SIZE.." items)",
 	tiles = wh.tiles(BACKGROUND_IMG),
-	
+
 	after_place_node = function(pos, placer, itemstack)
 		return wh.after_place_node(Box, pos, placer, itemstack)
 	end,
@@ -58,7 +58,7 @@ minetest.register_node(NODE_NAME, {
 	on_metadata_inventory_put = wh.on_metadata_inventory_put,
 	allow_metadata_inventory_take = wh.allow_metadata_inventory_take,
 	allow_metadata_inventory_move = wh.allow_metadata_inventory_move,
-	
+
 	on_rotate = screwdriver.disallow,
 	paramtype = "light",
 	sunlight_propagates = true,
@@ -66,12 +66,13 @@ minetest.register_node(NODE_NAME, {
 	groups = {choppy=2, cracky=2, crumbly=2},
 	is_ground_content = false,
 	sounds = default.node_sound_metal_defaults(),
+	on_blast = function() end,
 })
 
 minetest.register_node(NODE_NAME.."_active", {
 	description = DESCRIPTION.." (8 x "..INV_SIZE.." items)",
 	tiles = wh.tiles_active(BACKGROUND_IMG),
-	
+
 	after_place_node = function(pos, placer, itemstack)
 		return wh.after_place_node(Box, pos, placer, itemstack)
 	end,
@@ -87,10 +88,10 @@ minetest.register_node(NODE_NAME.."_active", {
 	on_metadata_inventory_put = wh.on_metadata_inventory_put,
 	allow_metadata_inventory_take = wh.allow_metadata_inventory_take,
 	allow_metadata_inventory_move = wh.allow_metadata_inventory_move,
-  
+
 	diggable = false,
 	can_dig = function() return false end,
-	
+
 	on_rotate = screwdriver.disallow,
 	paramtype = "light",
 	sunlight_propagates = true,
@@ -99,12 +100,13 @@ minetest.register_node(NODE_NAME.."_active", {
 	is_ground_content = false,
 	sounds = default.node_sound_metal_defaults(),
 	drop = NODE_NAME,
+	on_blast = function() end,
 })
 
 minetest.register_node(NODE_NAME.."_defect", {
 	description = DESCRIPTION.." (8 x "..INV_SIZE.." items)",
 	tiles = wh.tiles_defect(BACKGROUND_IMG),
-	
+
 	after_place_node = function(pos, placer, itemstack)
 		wh.after_place_node(Box, pos, placer, itemstack)
 		Box.State:defect(pos, M(pos))
@@ -121,7 +123,7 @@ minetest.register_node(NODE_NAME.."_defect", {
 	on_metadata_inventory_put = wh.on_metadata_inventory_put,
 	allow_metadata_inventory_take = wh.allow_metadata_inventory_take,
 	allow_metadata_inventory_move = wh.allow_metadata_inventory_move,
-	
+
 	on_rotate = screwdriver.disallow,
 	paramtype = "light",
 	sunlight_propagates = true,
@@ -129,9 +131,10 @@ minetest.register_node(NODE_NAME.."_defect", {
 	groups = {choppy=2, cracky=2, crumbly=2, not_in_creative_inventory=1},
 	is_ground_content = false,
 	sounds = default.node_sound_metal_defaults(),
+	on_blast = function() end,
 })
 
-tubelib.register_node(NODE_NAME, 
+tubelib.register_node(NODE_NAME,
 	{NODE_NAME.."_active", NODE_NAME.."_defect"}, {
 	on_push_item = function(pos, side, item)
 		local meta = M(pos)
@@ -176,7 +179,7 @@ tubelib.register_node(NODE_NAME,
 	on_node_repair = function(pos)
 		return Box.State:on_node_repair(pos)
 	end,
-})	
+})
 
 minetest.register_craft({
 	output = NODE_NAME,

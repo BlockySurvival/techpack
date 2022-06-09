@@ -7,9 +7,9 @@
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	liquidsampler.lua
-	
+
 ]]--
 
 -- Load support for I18n
@@ -59,12 +59,12 @@ local function get_pos(pos, facedir, side)
 	facedir = (facedir + offs[side]) % 4
 	local dir = minetest.facedir_to_dir(facedir)
 	return vector.add(dst_pos, dir)
-end	
+end
 
 
 local function test_liquid(node)
 	local liquiddef = bucket.liquids[node.name]
-	if liquiddef ~= nil	and liquiddef.itemname ~= nil and 
+	if liquiddef ~= nil	and liquiddef.itemname ~= nil and
 			node.name == liquiddef.source then
 		return liquiddef.itemname
 	end
@@ -165,7 +165,7 @@ minetest.register_node("tubelib_addons1:liquidsampler", {
 		State:on_dig_node(pos, node, player)
 		tubelib.remove_node(pos)
 	end,
-	
+
 	on_rotate = screwdriver.disallow,
 	on_timer = keep_running,
 	on_receive_fields = on_receive_fields,
@@ -179,6 +179,7 @@ minetest.register_node("tubelib_addons1:liquidsampler", {
 	groups = {choppy=2, cracky=2, crumbly=2},
 	is_ground_content = false,
 	sounds = default.node_sound_wood_defaults(),
+	on_blast = function() end,
 })
 
 minetest.register_node("tubelib_addons1:liquidsampler_active", {
@@ -219,6 +220,7 @@ minetest.register_node("tubelib_addons1:liquidsampler_active", {
 	is_ground_content = false,
 	sounds = default.node_sound_wood_defaults(),
 	drop = "tubelib_addons1:liquidsampler",
+	on_blast = function() end,
 })
 
 minetest.register_node("tubelib_addons1:liquidsampler_defect", {
@@ -269,6 +271,7 @@ minetest.register_node("tubelib_addons1:liquidsampler_defect", {
 	groups = {choppy=2, cracky=2, crumbly=2, not_in_creative_inventory=1},
 	is_ground_content = false,
 	sounds = default.node_sound_wood_defaults(),
+	on_blast = function() end,
 })
 
 minetest.register_craft({
@@ -280,7 +283,7 @@ minetest.register_craft({
 	},
 })
 
-tubelib.register_node("tubelib_addons1:liquidsampler", 
+tubelib.register_node("tubelib_addons1:liquidsampler",
 	{"tubelib_addons1:liquidsampler_active", "tubelib_addons1:liquidsampler_defect"}, {
 	invalid_sides = {"L"},
 	on_pull_item = function(pos, side)
@@ -306,4 +309,4 @@ tubelib.register_node("tubelib_addons1:liquidsampler",
 	on_node_repair = function(pos)
 		return State:on_node_repair(pos)
 	end,
-})	
+})

@@ -64,6 +64,7 @@ minetest.register_node("gravelsieve:sieve_defect", {
     sunlight_propagates = true,
     is_ground_content = false,
     groups = { choppy = 2, cracky = 1, not_in_creative_inventory = 1 },
+	on_blast = function() end,
 })
 
 tubelib.register_node("gravelsieve:auto_sieve3",
