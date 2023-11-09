@@ -197,6 +197,7 @@ minetest.register_node("tubelib_addons1:reformer", {
 
 	-- the reformer needs 'on_dig' to be able to remove the upper node
 	on_dig = function(pos, node, puncher)
+		if not puncher then return end
 		local pos_above = vector.add(pos, vector.new(0, 1, 0))
 		local player_name = puncher:get_player_name()
 
@@ -269,6 +270,7 @@ minetest.register_node("tubelib_addons1:reformer_defect", {
 
 	-- the reformer needs 'on_dig' to be able to remove the upper node
 	on_dig = function(pos, node, puncher, pointed_thing)
+		if not puncher then return end
 		local pos_above = vector.add(pos, vector.new(0, 1, 0))
 		local puncher_name = puncher:get_player_name()
 
