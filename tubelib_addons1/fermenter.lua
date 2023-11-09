@@ -327,6 +327,9 @@ minetest.register_node("tubelib_addons1:fermenter_top", {
 	is_ground_content = false,
 	pointable = false,
 	on_blast = function() end,
+
+	-- Prevent falling nodes from breaking things
+	can_dig = function() return false end,
 })
 
 minetest.register_craftitem("tubelib_addons1:biogas", {
