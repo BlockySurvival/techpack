@@ -35,13 +35,14 @@ local COUNTDOWN_TICKS = 2
 local OFFSET = 5  -- for uneven terrains
 
 -- start on top of the base block
-local function working_start_pos(pos)
+local function working_start_pos(pos, height)
 	local working_pos = table.copy(pos)
-	working_pos.y = working_pos.y + MAX_HEIGHT
+	working_pos.y = working_pos.y + height
 	return working_pos
 end
 
 local Radius2Idx = {[4]=1 ,[6]=2, [8]=3, [10]=4, [12]=5, [14]=6, [16]=7}
+local Height2Idx = {[6]=1, [8]=2, [10]=3, [12]=4, [14]=5, [16]=6, [18]=7}
 
 local function formspec(self, pos, meta)
 	-- some recalculations
@@ -52,6 +53,7 @@ local function formspec(self, pos, meta)
 		fuel = 0
 	end
 	local radius = Radius2Idx[this.radius] or 2
+	local height = Height2Idx[this.height or MAX_HEIGHT] or 7
 
 	return "size[9,8]"..
 	default.gui_bg..
@@ -59,7 +61,9 @@ local function formspec(self, pos, meta)
 	default.gui_slots..
 	"dropdown[0,0;1.5;radius;4,6,8,10,12,14,16;"..radius.."]"..
 	"label[1.6,0.2;"..S("Area radius").."]"..
-	"checkbox[0,1;endless;"..S("Run endless")..";"..endless.."]"..
+	"dropdown[0,1;1.5;height;6,8,10,12,14,16,18;"..height.."]"..
+	"label[1.6,1.2;"..S("Area height").."]"..
+	"checkbox[0,2;endless;"..S("Run endless")..";"..endless.."]"..
 	"list[context;main;5,0;4,4;]"..
 	"list[context;fuel;1.5,3;1,1;]"..
 	"item_image[1.5,3;1,1;tubelib_addons1:biofuel]"..
@@ -82,7 +86,7 @@ local State = tubelib.NodeStates:new({
 	on_start = function(pos, meta, oldstate)
 		local this = minetest.deserialize(meta:get_string("this"))
 		this.idx = 0
-		this.working_pos = working_start_pos(pos)
+		this.working_pos = working_start_pos(pos, this.height or MAX_HEIGHT)
 		meta:set_string("this", minetest.serialize(this))
 	end,
 	formspec_func = formspec,
@@ -210,7 +214,7 @@ local function calc_new_pos(pos, this, meta)
 	if this.idx >= this.max then
 		if this.endless == 1 then
 			this.idx = 0
-			this.working_pos = working_start_pos(pos)
+			this.working_pos = working_start_pos(pos, this.height or MAX_HEIGHT)
 			return true
 		else
 			return false
@@ -297,6 +301,7 @@ local function on_receive_fields(pos, formname, fields, player)
 	local meta = M(pos)
 	local this = minetest.deserialize(meta:get_string("this"))
 	local radius = this.radius
+	local height = this.height
 
 	if fields.radius ~= nil then
 		radius = tonumber(fields.radius)
@@ -304,6 +309,15 @@ local function on_receive_fields(pos, formname, fields, player)
 	if radius ~= this.radius then
 		this.radius = radius
 		this.max = (radius*2 + 1) * (radius*2 + 1)
+		meta:set_string("this", minetest.serialize(this))
+		State:stop(pos, meta)
+	end
+
+	if fields.height ~= nil then
+		height = tonumber(fields.height)
+	end
+	if height ~= this.height then
+		this.height = height
 		meta:set_string("this", minetest.serialize(this))
 		State:stop(pos, meta)
 	end
@@ -334,10 +348,11 @@ minetest.register_node("tubelib_addons1:harvester_base", {
 		local this = {
 			number = number,
 			owner = placer:get_player_name(),
-			working_pos = working_start_pos(pos),
+			working_pos = working_start_pos(pos, MAX_HEIGHT),
 			fuel = 0,
 			endless = 0,
 			radius = 6,
+			height = MAX_HEIGHT,
 			idx = 0,
 			max = (6+1+6) * (6+1+6)
 		}
@@ -393,10 +408,11 @@ minetest.register_node("tubelib_addons1:harvester_defect", {
 		local this = {
 			number = number,
 			owner = placer:get_player_name(),
-			working_pos = working_start_pos(pos),
+			working_pos = working_start_pos(pos, MAX_HEIGHT),
 			fuel = 0,
 			endless = 0,
 			radius = 6,
+			height = MAX_HEIGHT,
 			idx = 0,
 			max = (6+1+6) * (6+1+6)
 		}
@@ -489,7 +505,7 @@ minetest.register_lbm({
 		local meta = M(pos)
 		local this = minetest.deserialize(meta:get_string("this"))
 		if this then
-			this.working_pos = this.copter_pos or working_start_pos(pos)
+			this.working_pos = this.copter_pos or working_start_pos(pos, this.height or MAX_HEIGHT)
 			meta:set_string("this", minetest.serialize(this))
 		end
 	end
