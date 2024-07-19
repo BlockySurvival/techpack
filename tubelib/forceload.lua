@@ -125,6 +125,12 @@ local function formspec(player)
 	return table.concat(tRes)
 end
 
+local function infotext(player_name, pos1, pos2)
+	return S("Area").." "..P2S(pos1).." "..S("to").." "..P2S(pos2).." "..S("loaded!").."\n"..
+		"Owned by "..player_name..".\n"..
+		S("Punch the block to make the area visible.")
+end
+
 
 minetest.register_node("tubelib:forceload", {
 	description = S("Tubelib Forceload Block"),
@@ -148,8 +154,7 @@ minetest.register_node("tubelib:forceload", {
 		if add_pos(pos, placer) then
 			minetest.forceload_block(pos, true)
 			local pos1, pos2, num, max = get_data(pos, placer)
-			M(pos):set_string("infotext", S("Area").." "..P2S(pos1).." "..S("to").." "..P2S(pos2).." "..S("loaded!").."\n"..
-				S("Punch the block to make the area visible."))
+			M(pos):set_string("infotext", infotext(placer:get_player_name(), pos1, pos2))
 			chat(placer, S("Area").." ("..num.."/"..max..") "..P2S(pos1).." "..S("to").." "..P2S(pos2).." "..S("loaded!"))
 			tubelib.mark_region(placer:get_player_name(), pos1, pos2)
 			M(pos):set_string("owner", placer:get_player_name())
@@ -220,3 +225,13 @@ minetest.register_on_leaveplayer(function(player)
 		minetest.forceload_free_block(pos, true)
 	end
 end)
+
+minetest.register_lbm({
+	name = "tubelib:forceload__user_infotext",
+	nodenames = {"tubelib:forceload"},
+	action = function(pos, node)
+		local pos1, pos2 = calc_area(pos)
+		local meta = M(pos)
+		meta:set_string("infotext", infotext(meta:get_string('owner'), pos1, pos2))
+	end,
+})
