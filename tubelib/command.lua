@@ -478,7 +478,7 @@ end
 -- Get one item from the given ItemList. The position within the list
 -- is incremented each time so that different item stacks will be considered.
 -- Returns nil if ItemList is empty.
-function tubelib.get_item(meta, listname)
+function tubelib.get_item(meta, listname, max)
 	if meta == nil or meta.get_inventory == nil then return nil end
 	local inv = meta:get_inventory()
 	if inv:is_empty(listname) then
@@ -490,7 +490,7 @@ function tubelib.get_item(meta, listname)
 		idx = (idx % size) + 1
 		local items = inv:get_stack(listname, idx)
 		if items:get_count() > 0 then
-			local taken = items:take_item(1)
+			local taken = items:take_item(math.min(max or 1, items:get_stack_max()))
 			inv:set_stack(listname, idx, items)
 			meta:set_int("tubelib_startpos", idx)
 			return taken
@@ -498,6 +498,10 @@ function tubelib.get_item(meta, listname)
 	end
 	meta:set_int("tubelib_startpos", 0)
 	return nil
+end
+
+function tubelib.get_stack(meta, listname)
+	return tubelib.get_item(meta, listname, 99)
 end
 
 -- Get one (or more) item(s) from the given ItemList, specified by stack number (1..n).
@@ -550,20 +554,6 @@ function tubelib.get_num_items(meta, listname, num)
 		end
 	end
 	return nil
-end
-
-function tubelib.get_stack(meta, listname)
-	local inv = meta:get_inventory()
-	local item = tubelib.get_item(meta, listname)
-	if item and item:get_stack_max() > 1 and inv:contains_item(listname, item) then
-		-- try to remove a complete stack
-		item:set_count(math.min(98, item:get_stack_max() - 1))
-		local taken = inv:remove_item(listname, item)
-		-- add the already removed
-		taken:set_count(taken:get_count() + 1)
-		return taken
-	end
-	return item
 end
 
 -- Return "full", "loaded", or "empty" depending
