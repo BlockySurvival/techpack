@@ -221,8 +221,29 @@ minetest.register_on_joinplayer(function(player)
 end)
 
 minetest.register_on_leaveplayer(function(player)
+	local all_players = minetest.get_connected_players()
+	local all_other_forceloads = {}
+	for _,other_player in ipairs(all_players) do
+		if other_player ~= player then
+			for _,other_pos in ipairs(get_pos_list(other_player)) do
+				local other_corner = calc_area(other_pos)
+				table.insert(all_other_forceloads, other_corner)
+			end
+		end
+	end
+	local function loaded_by_another(pos)
+		local corner = calc_area(pos)
+		for _,other_corner in ipairs(all_other_forceloads) do
+			if vector.equals(corner, other_corner) then
+				return true
+			end
+		end
+		return false
+	end
 	for _,pos in ipairs(get_pos_list(player)) do
-		minetest.forceload_free_block(pos, true)
+		if not loaded_by_another(pos) then
+			minetest.forceload_free_block(pos, true)
+		end
 	end
 end)
 
